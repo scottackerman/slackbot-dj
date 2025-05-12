@@ -38,23 +38,27 @@ def mark_track_as_added(track_id):
     conn.commit()
 
 def add_tracks_to_playlist(track_ids):
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-        client_id=SPOTIPY_CLIENT_ID,
-        client_secret=SPOTIPY_CLIENT_SECRET,
-        redirect_uri=SPOTIPY_REDIRECT_URI,
-        scope='playlist-modify-public playlist-modify-private'))
+    try:
+        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+            client_id=SPOTIPY_CLIENT_ID,
+            client_secret=SPOTIPY_CLIENT_SECRET,
+            redirect_uri=SPOTIPY_REDIRECT_URI,
+            scope='playlist-modify-public playlist-modify-private'))
 
-    for track_id in track_ids:
-        if not track_already_added(track_id):
-            try:
-                print(f"🎧 Adding track {track_id} to playlist...")
-                sp.playlist_add_items(SPOTIFY_PLAYLIST_ID, [track_id])
-                mark_track_as_added(track_id)
-                print(f"✅ Added track {track_id}")
-            except Exception as e:
-                print(f"❌ Error adding track {track_id}: {e}")
-        else:
-            print(f"⚠️ Track {track_id} already added, skipping.")
+        for track_id in track_ids:
+            if not track_already_added(track_id):
+                try:
+                    print(f"🎧 Adding track {track_id} to playlist...")
+                    sp.playlist_add_items(SPOTIFY_PLAYLIST_ID, [track_id])
+                    mark_track_as_added(track_id)
+                    print(f"✅ Added track {track_id}")
+                except Exception as e:
+                    print(f"❌ Error adding track {track_id}: {e}")
+            else:
+                print(f"⚠️ Track {track_id} already added, skipping.")
+    except Exception as outer:
+        print(f"❌ Error in add_tracks_to_playlist(): {outer}")
+
 
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
