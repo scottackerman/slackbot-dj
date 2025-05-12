@@ -7,6 +7,7 @@ from slack_sdk.errors import SlackApiError
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # --- Load env vars ---
@@ -17,11 +18,6 @@ SPOTIPY_REDIRECT_URI = os.environ['SPOTIPY_REDIRECT_URI']
 SPOTIFY_PLAYLIST_ID = os.environ['SPOTIFY_PLAYLIST_ID']
 
 slack_client = WebClient(token=SLACK_BOT_TOKEN)
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=SPOTIPY_CLIENT_ID,
-    client_secret=SPOTIPY_CLIENT_SECRET,
-    redirect_uri=SPOTIPY_REDIRECT_URI,
-    scope='playlist-modify-public playlist-modify-private'))
 
 app = Flask(__name__)
 conn = sqlite3.connect('added_tracks.db', check_same_thread=False)
@@ -41,6 +37,12 @@ def mark_track_as_added(track_id):
     conn.commit()
 
 def add_tracks_to_playlist(track_ids):
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+        client_id=SPOTIPY_CLIENT_ID,
+        client_secret=SPOTIPY_CLIENT_SECRET,
+        redirect_uri=SPOTIPY_REDIRECT_URI,
+        scope='playlist-modify-public playlist-modify-private'))
+
     for track_id in track_ids:
         if not track_already_added(track_id):
             try:
