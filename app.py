@@ -46,10 +46,14 @@ def add_tracks_to_playlist(track_ids):
     for track_id in track_ids:
         if not track_already_added(track_id):
             try:
+                print(f"🎧 Adding track {track_id} to playlist...")
                 sp.playlist_add_items(SPOTIFY_PLAYLIST_ID, [track_id])
                 mark_track_as_added(track_id)
+                print(f"✅ Added track {track_id}")
             except Exception as e:
-                print(f"Error adding track {track_id}: {e}")
+                print(f"❌ Error adding track {track_id}: {e}")
+        else:
+            print(f"⚠️ Track {track_id} already added, skipping.")
 
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
