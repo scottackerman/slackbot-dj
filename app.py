@@ -4,6 +4,7 @@ import re
 from flask import Flask, request
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+from flask import jsonify
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
@@ -53,11 +54,9 @@ def add_tracks_to_playlist(track_ids):
 def slack_events():
     data = request.get_json()
 
-    # ✅ Step 1: Respond to Slack's URL verification
     if data.get('type') == 'url_verification':
-        return data['challenge'], 200
+        return jsonify({'challenge': data['challenge']})
 
-    # ✅ Step 2: Handle incoming Slack messages
     if 'event' in data:
         event = data['event']
         if event.get('type') == 'message' and 'text' in event:
@@ -84,4 +83,5 @@ def scrape_channel(channel_id):
         print(f"Slack error: {e.response['error']}")
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    port = int(os.environ.get('PORT', 3000))
+    app.run(host='0.0.0.0', port=port)
