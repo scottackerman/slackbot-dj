@@ -1,3 +1,4 @@
+import threading
 import os
 import sqlite3
 import re
@@ -59,28 +60,23 @@ def add_tracks_to_playlist(track_ids):
 def slack_events():
     try:
         data = request.get_json(force=True)
-        print("Parsed JSON:", data)
-
         event = data.get('event', {})
 
-        # ✅ Skip messages with subtypes like 'message_deleted'
         if event.get('subtype'):
-            print(f"⚠️ Skipping message with subtype: {event['subtype']}")
             return '', 200
 
         if event.get('type') == 'message' and 'text' in event:
             text = event['text']
-            print("Message text:", text)
-
             track_ids = extract_track_ids(text)
             print("🎧 Track IDs:", track_ids)
 
-            add_tracks_to_playlist(track_ids)
+            # ✅ Respond right away, then handle it after
+            threading.Thread(target=add_tracks_to_playlist, args=(track_ids,)).start()
 
     except Exception as e:
         print("❌ Error handling event:", str(e))
 
-    return '', 200
+    return '', 200  # 👈 Immediate response to Slack
 
 @app.route('/test', methods=['GET'])
 def test():
