@@ -51,6 +51,7 @@ def add_tracks_to_playlist(track_ids):
 
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
+    print("✅ /slack/events endpoint was hit!")
     try:
         raw_data = request.data
         print("RAW data received:", raw_data)
