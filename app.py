@@ -59,7 +59,6 @@ def slack_events():
         print("Parsed JSON:", data)
 
         if data.get('type') == 'url_verification':
-            print("Returning Slack challenge:", data['challenge'])
             return jsonify({'challenge': data['challenge']})
 
         if 'event' in data:
@@ -74,6 +73,10 @@ def slack_events():
         print("ERROR in /slack/events:", str(e))
 
     return '', 200
+
+@app.route('/test', methods=['GET'])
+def test():
+    return "App is alive!", 200
 
 def scrape_channel(channel_id):
     try:
