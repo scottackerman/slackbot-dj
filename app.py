@@ -58,25 +58,35 @@ def add_tracks_to_playlist(track_ids):
 
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
+    print("🔥 /slack/events was hit!")
+
     try:
         data = request.get_json(force=True)
+        print("📦 Parsed JSON:", data)
+
+        if request.headers.get("X-Slack-Retry-Num"):
+            print("⏱ Slack retry — ignoring.")
+            return '', 200
+
         event = data.get('event', {})
 
         if event.get('subtype'):
+            print(f"⚠️ Skipping message with subtype: {event['subtype']}")
             return '', 200
 
         if event.get('type') == 'message' and 'text' in event:
             text = event['text']
+            print("💬 Message text:", text)
+
             track_ids = extract_track_ids(text)
             print("🎧 Track IDs:", track_ids)
 
-            # ✅ Respond right away, then handle it after
             threading.Thread(target=add_tracks_to_playlist, args=(track_ids,)).start()
 
     except Exception as e:
-        print("❌ Error handling event:", str(e))
+        print("❌ Exception in /slack/events:", str(e))
 
-    return '', 200  # 👈 Immediate response to Slack
+    return '', 200
 
 @app.route('/test', methods=['GET'])
 def test():
