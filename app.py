@@ -53,11 +53,11 @@ def add_tracks_to_playlist(track_ids):
 def slack_events():
     data = request.get_json()
 
-    # ✅ Handle Slack URL Verification
+    # ✅ Step 1: Respond to Slack's URL verification
     if data.get('type') == 'url_verification':
         return data['challenge'], 200
 
-    # ✅ Handle actual events
+    # ✅ Step 2: Handle incoming Slack messages
     if 'event' in data:
         event = data['event']
         if event.get('type') == 'message' and 'text' in event:
