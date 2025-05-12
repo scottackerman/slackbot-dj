@@ -57,27 +57,28 @@ def add_tracks_to_playlist(track_ids):
 
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
-    print("✅ /slack/events endpoint was hit!")
     try:
-        raw_data = request.data
-        print("RAW data received:", raw_data)
-
         data = request.get_json(force=True)
         print("Parsed JSON:", data)
 
-        if data.get('type') == 'url_verification':
-            return jsonify({'challenge': data['challenge']})
+        event = data.get('event', {})
 
-        if 'event' in data:
-            event = data['event']
-            print("Incoming event:", event)
-            if event.get('type') == 'message' and 'text' in event:
-                track_ids = extract_track_ids(event['text'])
-                print("Track IDs:", track_ids)
-                add_tracks_to_playlist(track_ids)
+        # ✅ Skip messages with subtypes like 'message_deleted'
+        if event.get('subtype'):
+            print(f"⚠️ Skipping message with subtype: {event['subtype']}")
+            return '', 200
+
+        if event.get('type') == 'message' and 'text' in event:
+            text = event['text']
+            print("Message text:", text)
+
+            track_ids = extract_track_ids(text)
+            print("🎧 Track IDs:", track_ids)
+
+            add_tracks_to_playlist(track_ids)
 
     except Exception as e:
-        print("ERROR in /slack/events:", str(e))
+        print("❌ Error handling event:", str(e))
 
     return '', 200
 
